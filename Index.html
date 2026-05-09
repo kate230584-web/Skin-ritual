@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Skin Ritual">
+  <meta name="theme-color" content="#2c1f17">
+  <title>Skin Ritual</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; height: 100%; background: #faf7f2; overscroll-behavior: none; }
+    body { font-family: 'DM Sans', 'Segoe UI', sans-serif; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+    #sr-app { background: #faf7f2; min-height: 100dvh; max-width: 480px; margin: 0 auto; position: relative; display: flex; flex-direction: column; }
+    .sr-header { background: rgba(245,240,232,0.97); padding: 16px 20px 12px; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .sr-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .sr-brand { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #9c7a68; margin-bottom: 2px; }
+    .sr-title { font-size: 26px; font-weight: 300; color: #1a120b; line-height: 1.15; }
+    .sr-title em { font-style: italic; color: #a96748; }
+    .sr-date { text-align: right; font-size: 11px; color: #9c7a68; line-height: 1.6; }
+    .sr-date-day { font-size: 16px; color: #1a120b; display: block; font-weight: 400; }
+    .sr-strip { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .sr-strip::-webkit-scrollbar { display: none; }
+    .sr-pill { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding: 7px 9px; border-radius: 10px; min-width: 44px; cursor: pointer; border: 1.5px solid rgba(232,196,176,0.4); background: white; transition: all 0.18s; -webkit-user-select: none; user-select: none; }
+    .sr-pill.today { border-color: #e8c4b0; }
+    .sr-pill.selected { background: #2c1f17; border-color: #2c1f17; }
+    .sr-pill .pday { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #9c7a68; margin-bottom: 2px; }
+    .sr-pill.today .pday { color: #a96748; }
+    .sr-pill.selected .pday { color: #faf7f2; }
+    .sr-pill .pnum { font-size: 17px; color: #6b4c3b; line-height: 1; }
+    .sr-pill.selected .pnum { color: #faf7f2; }
+    .sr-pill .pdot { width: 4px; height: 4px; border-radius: 50%; margin-top: 3px; background: transparent; transition: background 0.3s; }
+    .sr-pill.prog .pdot { background: #8fa68e; }
+    .sr-pill.done-all .pdot { background: #a96748; }
+    .sr-pill.selected .pdot { background: rgba(250,247,242,0.35); }
+    .sr-pill.selected.prog .pdot { background: #8fa68e; }
+    .sr-pill.selected.done-all .pdot { background: #e8c4b0; }
+    .sr-toggle { display: flex; background: #f5f0e8; border-radius: 100px; padding: 3px; border: 1px solid rgba(169,103,72,0.15); }
+    .sr-tbtn { flex: 1; padding: 9px 0; border: none; cursor: pointer; background: transparent; color: #9c7a68; border-radius: 100px; font-size: 13px; font-family: inherit; letter-spacing: 0.04em; transition: all 0.25s; -webkit-user-select: none; user-select: none; }
+    .sr-tbtn.active { background: #2c1f17; color: #faf7f2; font-weight: 500; }
+    .sr-progress { padding: 10px 20px 6px; }
+    .sr-bar-wrap { height: 3px; background: rgba(169,103,72,0.15); border-radius: 10px; overflow: hidden; margin-bottom: 5px; }
+    .sr-bar-fill { height: 100%; background: linear-gradient(90deg,#c9947a,#a96748); border-radius: 10px; transition: width 0.45s cubic-bezier(0.4,0,0.2,1); }
+    .sr-plabel { font-size: 11px; color: #9c7a68; }
+    .sr-plabel span { color: #a96748; font-weight: 500; }
+    .sr-steps { padding: 6px 16px 32px; flex: 1; }
+    .sr-note { margin-bottom: 10px; padding: 10px 12px; background: rgba(143,166,142,0.1); border-left: 2px solid #8fa68e; border-radius: 0 8px 8px 0; font-size: 12px; color: #6b4c3b; line-height: 1.6; }
+    .sr-note strong { color: #8fa68e; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 2px; }
+    .sr-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: white; border-radius: 14px; border: 1.5px solid transparent; cursor: pointer; margin-bottom: 7px; transition: all 0.22s; -webkit-user-select: none; user-select: none; }
+    .sr-card:active { transform: scale(0.98); }
+    .sr-card.done { background: #f5f0e8; border-color: rgba(169,103,72,0.2); }
+    .sr-num { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1.5px solid #e8c4b0; background: white; font-size: 14px; color: #9c7a68; transition: all 0.25s; }
+    .sr-card.done .sr-num { background: #a96748; border-color: #a96748; color: white; font-size: 12px; }
+    .sr-info { flex: 1; min-width: 0; }
+    .sr-name { font-size: 13px; font-weight: 500; color: #1a120b; margin-bottom: 1px; line-height: 1.3; transition: color 0.2s; }
+    .sr-card.done .sr-name { color: #9c7a68; text-decoration: line-through; text-decoration-color: #e8c4b0; }
+    .sr-brand2 { font-size: 10px; color: #9c7a68; }
+    .sr-note2 { font-size: 10px; color: #9c7a68; font-style: italic; opacity: 0.85; margin-top: 1px; }
+    .sr-tag { font-size: 9px; padding: 2px 7px; border-radius: 100px; font-weight: 500; flex-shrink: 0; align-self: flex-start; letter-spacing: 0.04em; }
+    .tag-w { background: rgba(143,166,142,0.2); color: #6b8f6a; border: 1px solid rgba(143,166,142,0.3); }
+    .tag-a { background: rgba(201,148,122,0.15); color: #a96748; border: 1px solid rgba(201,148,122,0.25); }
+    .sr-celebrate { text-align: center; padding: 44px 16px; }
+    .sr-celebrate .emoji { font-size: 48px; display: block; margin-bottom: 12px; }
+    .sr-celebrate .msg { font-size: 20px; font-weight: 300; font-style: italic; color: #a96748; line-height: 1.5; }
+    .sr-future { text-align: center; padding: 50px 16px; font-size: 18px; font-style: italic; color: #9c7a68; line-height: 1.7; }
+    .sr-future em { color: #a96748; }
+    .sr-bottom { position: sticky; bottom: 0; padding: 12px 16px calc(16px + env(safe-area-inset-bottom)); background: linear-gradient(0deg, #faf7f2 70%, transparent); }
+    .sr-reset { width: 100%; padding: 13px; background: #2c1f17; color: #faf7f2; border: none; border-radius: 12px; font-family: inherit; font-size: 13px; letter-spacing: 0.07em; cursor: pointer; transition: all 0.18s; }
+    .sr-reset:active { transform: scale(0.98); opacity: 0.88; }
+    @keyframes slin { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .slin { animation: slin 0.3s ease both; }
+    @keyframes fdin { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+    .fdin { animation: fdin 0.4s ease both; }
+  </style>
+</head>
+<body>
+<div id="sr-app">
+  <div class="sr-header">
+    <div class="sr-top">
+      <div>
+        <div class="sr-brand">Skin Ritual</div>
+        <div class="sr-title">Your <em>daily</em><br>routine</div>
+      </div>
+      <div class="sr-date">
+        <span class="sr-date-day" id="todayName"></span>
+        <span id="todayFull"></span>
+      </div>
+    </div>
+    <div class="sr-strip" id="strip"></div>
+    <div class="sr-toggle">
+      <button class="sr-tbtn active" id="amBtn" onclick="setSess('am')">☀︎ Morning</button>
+      <button class="sr-tbtn" id="pmBtn" onclick="setSess('pm')">☽ Evening</button>
+    </div>
+  </div>
+  <div class="sr-progress">
+    <div class="sr-bar-wrap"><div class="sr-bar-fill" id="bar" style="width:0%"></div></div>
+    <div class="sr-plabel" id="plabel"></div>
+  </div>
+  <div class="sr-steps" id="steps"></div>
+  <div class="sr-bottom">
+    <button class="sr-reset" onclick="reset()">Reset this session</button>
+  </div>
+</div>
+<script>
+const ALL=[0,1,2,3,4,5,6],BHA=[1,3,5],RET=[2,4,6],ODD=[0,2,4,6],EVEN=[1,3,5];
+const RB={
+  am:[
+    {id:'a1',name:'Light Cleansing Oil',brand:'SKIN1004 Madagascar Centella',note:'Double cleanse — start here',days:ALL,tag:null},
+    {id:'a2',name:'Hydrating Cleanser',brand:'Superdrug Me+ (HA + Niacinamide)',note:'Second cleanse, rinse well',days:ALL,tag:null},
+    {id:'a3',name:'Ceramide Mochi Toner',brand:'Tonymoly Wonder',note:'Pat into damp skin',days:ALL,tag:null},
+    {id:'a4',name:'Centella Brightening Ampoule',brand:'SKIN1004 Madagascar Centella',note:'2–3 drops, press in gently',days:ALL,tag:null},
+    {id:'a5',name:'Snail 96 Mucin Essence',brand:'COSRX Advanced',note:'Layer for extra hydration',days:ALL,tag:null},
+    {id:'a6',name:'Azelaic Acid 10 Redness Serum',brand:'Anua',note:'Targets redness & uneven tone',days:ALL,tag:null},
+    {id:'a7',name:'Revive Eye Serum',brand:'Beauty of Joseon (Ginseng + Retinal)',note:'Tap gently around eye area',days:ALL,tag:null},
+    {id:'a8',name:'Ceramide Ato Cream',brand:'Illiyoon',note:'Alternate days — today is Illiyoon',days:ODD,tag:'alt'},
+    {id:'a8b',name:'VT PDRN Cream',brand:'VT',note:'Alternate days — today is VT PDRN',days:EVEN,tag:'alt'},
+    {id:'a9',name:'Water-Fit Sun Serum SPF50+',brand:'SKIN1004 Madagascar Centella',note:'Last step — generous layer!',days:ALL,tag:null},
+  ],
+  pm:[
+    {id:'p1',name:'Light Cleansing Oil',brand:'SKIN1004 Madagascar Centella',note:'Melt away sunscreen & makeup',days:ALL,tag:null},
+    {id:'p2',name:'Hydrating Cleanser',brand:'Superdrug Me+ (HA + Niacinamide)',note:'Second cleanse, rinse well',days:ALL,tag:null},
+    {id:'p3',name:'BHA Toner',brand:'Superdrug Me+',note:'Mon · Wed · Fri only',days:BHA,tag:'weekly'},
+    {id:'p4',name:'Ceramide Mochi Toner',brand:'Tonymoly Wonder',note:'Pat into damp skin',days:ALL,tag:null},
+    {id:'p5',name:'Centella Brightening Ampoule',brand:'SKIN1004 Madagascar Centella',note:'2–3 drops, press in gently',days:ALL,tag:null},
+    {id:'p6',name:'Snail 96 Mucin Essence',brand:'COSRX Advanced',note:'Calms & hydrates overnight',days:ALL,tag:null},
+    {id:'p7',name:'Azelaic Acid 10 Redness Serum',brand:'Anua',note:'Brightens while you sleep',days:ALL,tag:null},
+    {id:'p8',name:'A-Game 10 Retinal Serum',brand:'Geek & Gorgeous',note:'Tue · Thu · Sat — apply before cream',days:RET,tag:'weekly'},
+    {id:'p9',name:'Revive Eye Serum',brand:'Beauty of Joseon (Ginseng + Retinal)',note:'Tap gently around eye area',days:ALL,tag:null},
+    {id:'p10',name:'VT PDRN Cream',brand:'VT',note:'Alternate nights — today is VT PDRN',days:EVEN,tag:'alt'},
+    {id:'p10b',name:'Ceramide Ato Cream',brand:'Illiyoon',note:'Alternate nights — today is Illiyoon',days:ODD,tag:'alt'},
+  ]
+};
+const DS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DF=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const KEY='skinRitual_v6';
+const today=new Date();today.setHours(0,0,0,0);
+let sess='am',selDate=new Date(today),ck=load();
+function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r).checked||{};}catch(e){}return{};}
+function save(){localStorage.setItem(KEY,JSON.stringify({checked:ck}));}
+function dk(d){return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();}
+function ckKey(d,s,id){return dk(d)+'_'+s+'_'+id;}
+function isChk(d,s,id){return!!ck[ckKey(d,s,id)];}
+function steps(d,s){return RB[s].filter(x=>x.days.includes(d.getDay()));}
+function setSess(s){sess=s;document.getElementById('amBtn').className='sr-tbtn'+(s==='am'?' active':'');document.getElementById('pmBtn').className='sr-tbtn'+(s==='pm'?' active':'');render();}
+function selectDay(ts){selDate=new Date(ts);selDate.setHours(0,0,0,0);renderStrip();render();}
+function toggle(id){const k=ckKey(selDate,sess,id);ck[k]=!ck[k];save();renderStrip();render();}
+function reset(){steps(selDate,sess).forEach(s=>{ck[ckKey(selDate,sess,s.id)]=false;});save();renderStrip();render();}
+function prog(d){const a=steps(d,'am'),p=steps(d,'pm');return{total:a.length+p.length,done:a.filter(s=>isChk(d,'am',s.id)).length+p.filter(s=>isChk(d,'pm',s.id)).length};}
+function weekDates(){return Array.from({length:7},(_,i)=>{const d=new Date(today);d.setDate(today.getDate()+i-3);return d;});}
+function renderStrip(){
+  const dates=weekDates(),sk=dk(selDate),tk=dk(today);
+  document.getElementById('strip').innerHTML=dates.map(d=>{
+    const dk2=dk(d),isSel=dk2===sk,isT=dk2===tk,pr=prog(d),isComp=pr.done===pr.total&&pr.total>0,hasPr=pr.done>0&&!isComp;
+    let cls='sr-pill'+(isT?' today':'')+(isSel?' selected':'')+(isComp?' done-all':hasPr?' prog':'');
+    return`<div class="${cls}" onclick="selectDay(${d.getTime()})"><div class="pday">${DS[d.getDay()]}</div><div class="pnum">${d.getDate()}</div><div class="pdot"></div></div>`;
+  }).join('');
+}
+function dayNote(dow,s){
+  if(s!=='pm')return null;
+  if(BHA.includes(dow)&&!RET.includes(dow))return{icon:'🌿',label:'BHA night',text:'BHA Toner is in your routine tonight. No retinal — gentle exfoliation only.'};
+  if(RET.includes(dow))return{icon:'✨',label:'Retinal night',text:'A-Game 10 Retinal is on tonight. Apply just before your moisturiser.'};
+  return{icon:'💧',label:'Rest night',text:'No BHA or retinal tonight — pure hydration to let your skin breathe.'};
+}
+function render(){
+  const isFut=selDate>today,st=steps(selDate,sess),dn=st.filter(s=>isChk(selDate,sess,s.id)).length,tot=st.length,pct=tot?(dn/tot*100):0;
+  document.getElementById('bar').style.width=pct+'%';
+  document.getElementById('plabel').innerHTML='<span>'+dn+' of '+tot+'</span> steps complete';
+  const el=document.getElementById('steps');
+  if(isFut){el.innerHTML='<div class="sr-future">Your routine for<br><em>'+DF[selDate.getDay()]+'</em> is ready.<br><br>Come back then —<br>it\'ll be waiting.</div>';return;}
+  if(dn===tot&&tot>0){const msg=sess==='am'?['🌸','Morning complete.<br>You\'re glowing.']:['🌙','Evening done.<br>Your skin is healing.'];el.innerHTML='<div class="sr-celebrate fdin"><span class="emoji">'+msg[0]+'</span><div class="msg">'+msg[1]+'</div></div>';return;}
+  const note=dayNote(selDate.getDay(),sess);
+  let html=note?'<div class="sr-note"><strong>'+note.icon+' '+note.label+'</strong>'+note.text+'</div>':'';
+  st.forEach((s,i)=>{
+    const done=isChk(selDate,sess,s.id);
+    const tag=s.tag==='weekly'?'<span class="sr-tag tag-w">WEEKLY</span>':s.tag==='alt'?'<span class="sr-tag tag-a">ALT</span>':'';
+    html+=`<div class="sr-card slin${done?' done':''}" onclick="toggle('${s.id}')" style="animation-delay:${i*0.035}s"><div class="sr-num">${done?'✓':(i+1)}</div><div class="sr-info"><div class="sr-name">${s.name}</div><div class="sr-brand2">${s.brand}</div><div class="sr-note2">${s.note}</div></div>${tag}</div>`;
+  });
+  el.innerHTML=html;
+}
+(function init(){
+  document.getElementById('todayName').textContent=DF[today.getDay()];
+  document.getElementById('todayFull').textContent=MO[today.getMonth()]+' '+today.getDate();
+  renderStrip();render();
+  setTimeout(()=>{const tp=[...document.querySelectorAll('.sr-pill')].find(p=>p.classList.contains('today'));if(tp)tp.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});},150);
+})();
+</script>
+</body>
+</html>
